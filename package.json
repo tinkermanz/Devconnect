@@ -1,0 +1,19 @@
+{
+	"name": "devconnect",
+	"version": "1.0.0",
+	"description": "a matchmaking service for devs",
+	"license": "ISC",
+	"author": "tinkermanz",
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"dev": "nodemon src/app.js",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"dependencies": {
+		"express": "^5.1.0"
+	},
+	"devDependencies": {
+		"nodemon": "^3.1.10"
+	}
+}
