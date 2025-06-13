@@ -1,15 +1,19 @@
 import express from "express";
 import connectDB from "./config/database.js";
 import { User } from "./models/user.js";
-import { validateSignUpData } from "./utils/validation.js";
-import bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
-import jwt from "jsonwebtoken";
 import { userAuth } from "./middlewares/auth.js";
+import { authRouter } from "./routes/auth.js";
+import { profileRouter } from "./routes/profile.js";
+import { connectionRequestRouter } from "./routes/request.js";
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", connectionRequestRouter);
 
 app.get("/feed", async (req, res, next) => {
 	try {
@@ -33,79 +37,6 @@ app.get("/user", userAuth, async (req, res, next) => {
 		} else res.send(user);
 	} catch (error) {
 		res.status(400).json({ error: "Something went wrong!!" });
-	}
-});
-
-app.post("/signup", async (req, res) => {
-	try {
-		// Validation of data
-		validateSignUpData(req);
-		// Encrypt the password
-		const { password, firstName, lastName, emailId } = req.body;
-		const passwordhash = await bcrypt.hash(password, 10);
-
-		// Creatingt a new instance of the User model
-		const user = new User({
-			firstName,
-			lastName,
-			emailId,
-			password: passwordhash,
-		});
-		await user.save();
-
-		res.send("User Created");
-	} catch (err) {
-		res.status(404).send("Error :" + err.message);
-	}
-});
-
-app.post("/login", async (req, res, next) => {
-	try {
-		const { emailId, password } = req.body;
-
-		const user = await User.findOne({
-			emailId: emailId,
-		});
-
-		if (!user) throw new Error("Invalid credential");
-
-		const isPasswordValid = await bcrypt.compare(password, user.password);
-
-		if (isPasswordValid) {
-			// Create JWT Token
-			const token = await jwt.sign(
-				{ _id: user._id },
-				"DEVCOnnect@0454594lkjkldjk34jkj5n4j5n4jo43j990i09ipok,mljapojoiaj",
-				{
-					expiresIn: "1d",
-				}
-			);
-			console.log(token);
-			// Add token to cookie an send the response back to user browser
-
-			res.cookie("token", token, {
-				httpOnly: true,
-				expires: new Date.now() + 8 * 3600000,
-			});
-
-			res.send("Login Successful");
-		} else throw new Error("Password is not valid");
-	} catch (error) {
-		res.status(400).send("Error:" + error.message);
-	}
-});
-
-app.get("/profile", async (req, res, next) => {
-	try {
-		const user = req.user;
-
-		if (!user) {
-			throw new Error("Invalid Credential");
-		}
-
-		res.send(user);
-	} catch (error) {
-		res.status(404).send("ERROR: " + error.message);
 	}
 });
 
@@ -161,8 +92,6 @@ app.patch("/user/:userId", async (req, res, next) => {
 		});
 	}
 });
-
-app.post("/sendConnectionRequest", async (req, res, next) => {});
 
 connectDB()
 	.then(() => {
