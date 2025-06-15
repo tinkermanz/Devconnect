@@ -1,7 +1,7 @@
 import express from "express";
 import { validateSignUpData } from "../utils/validation.js";
 import { User } from "../models/user.js";
-import { userAuth } from "../middlewares/auth.js";
+import bcrypt from "bcrypt";
 
 const authRouter = express.Router();
 
@@ -11,7 +11,7 @@ authRouter.post("/signup", async (req, res) => {
 		validateSignUpData(req);
 		// Encrypt the password
 		const { password, firstName, lastName, emailId } = req.body;
-		const passwordhash = await user.getHashedPassword(password);
+		const passwordhash = await bcrypt.hash(password, 10);
 
 		// Creatingt a new instance of the User model
 		const user = new User({
@@ -20,6 +20,7 @@ authRouter.post("/signup", async (req, res) => {
 			emailId,
 			password: passwordhash,
 		});
+
 		await user.save();
 
 		res.send("User Created");
@@ -33,7 +34,7 @@ authRouter.post("/login", async (req, res, next) => {
 		const { emailId, password } = req.body;
 
 		const user = await User.findOne({
-			emailId: emailId,
+			emailId,
 		});
 
 		if (!user) throw new Error("Invalid credential");
@@ -48,13 +49,13 @@ authRouter.post("/login", async (req, res, next) => {
 
 			res.cookie("token", token, {
 				httpOnly: true,
-				expires: new Date.now() + 8 * 3600000,
+				expires: new Date(Date.now() + 8 * 3600000),
 			});
 
 			res.send("Login Successful");
 		} else throw new Error("Password is not valid");
 	} catch (error) {
-		res.status(400).send("Error:" + error.message);
+		res.status(400).send("Error: " + error.message);
 	}
 });
 

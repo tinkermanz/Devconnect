@@ -4,6 +4,7 @@ const connectionRequestSchema = new Schema(
 	{
 		fromUserId: {
 			type: mongoose.Schema.Types.ObjectId,
+			ref: "User",
 			required: true,
 		},
 		toUserId: {
@@ -22,6 +23,12 @@ const connectionRequestSchema = new Schema(
 		timestamps: true,
 	}
 );
+
+// Compound indexing
+connectionRequestSchema.index({
+	fromUserId: 1,
+	toUserId: 1,
+});
 
 connectionRequestSchema.pre("save", function (next) {
 	const connectionRequest = this;

@@ -24,7 +24,7 @@ connectionRequestRouter.post(
 			}
 
 			// Check if toUserId exists on DB
-			const toUser = await User.findOne(toUserId);
+			const toUser = await User.findOne({ _id: toUserId });
 			if (!toUser) {
 				return res.status(404).json({
 					message: "User not found",
@@ -65,6 +65,52 @@ connectionRequestRouter.post(
 			});
 		} catch (error) {
 			res.status(400).send("Error: " + error.message);
+		}
+	}
+);
+
+connectionRequestRouter.post(
+	"/request/review/:status/:requestId",
+	userAuth,
+	async (req, res, next) => {
+		try {
+			const loggedInUser = req.user;
+			const { status, requestId } = req.params;
+
+			// Validate the status
+			const ALLOWED_STATUS = ["accepted", "rejected"];
+			if (!ALLOWED_STATUS.includes(status)) {
+				return res.status(400).json({
+					message: `Status is not allowed`,
+				});
+			}
+
+			const connectionRequest = await ConnectionRequest.findOne({
+				_id: requestId,
+				toUserId: loggedInUser._id,
+				status: "interested",
+			});
+
+			if (!connectionRequest)
+				return res.status(404).json({
+					message: "Connection Request not found",
+				});
+
+			connectionRequest.status = status;
+			const data = await connectionRequest.save();
+
+			res.json({
+				message: "Connection Request " + status,
+				data,
+			});
+
+			// Some fromUser => toUserId
+			// loggedInUser == toUser
+			// status = intersted
+
+			// requestId should be valid
+		} catch (error) {
+			res.status(400).send("ERROR: " + error.message);
 		}
 	}
 );

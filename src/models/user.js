@@ -19,6 +19,7 @@ const userSchema = new Schema(
 			type: String,
 			required: true,
 			unique: true,
+			trim: true,
 			validate(value) {
 				if (!validator.isEmail(value)) {
 					throw new Error("Invalid email address" + value);
@@ -84,10 +85,6 @@ userSchema.methods.getJWT = async function () {
 		}
 	);
 	return token;
-};
-
-userSchema.methods.getHashedPassword = async function (password) {
-	return await bcrypt.hash(password, 10);
 };
 
 userSchema.methods.validatePassword = async function (password) {
