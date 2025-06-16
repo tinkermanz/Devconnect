@@ -1,6 +1,7 @@
 import express from "express";
 import { userAuth } from "../middlewares/auth.js";
 import { ConnectionRequest } from "../models/connectionRequest.js";
+import { User } from "../models/user.js";
 
 const userRouter = express.Router();
 
@@ -67,6 +68,47 @@ userRouter.get("/user/connections", userAuth, async (req, res, next) => {
 		});
 	} catch (error) {
 		res.status(400).send({
+			message: error.message,
+		});
+	}
+});
+
+userRouter.get("/feed", userAuth, async (req, res, next) => {
+	try {
+		// TODO:
+		// User should see all user cards except
+		// his own card
+		// his connections that has been accepted
+		//  ignored connection
+		// already sent connecton requests
+
+		const loggedInUser = req.user;
+
+		// Find all the connection requests (sent + recieved)
+		const connectionRequests = await ConnectionRequest.find({
+			$or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+		}).select("fromUserId toUserId");
+
+		const hideUsersFromFeed = new Set();
+
+		connectionRequests.forEach((req) => {
+			hideUsersFromFeed.add(req.fromUserId.toString());
+			hideUsersFromFeed.add(req.toUserId.toString());
+		});
+		const users = await User.find({
+			$and: [
+				{ _id: { $nin: Array.from(hideUsersFromFeed) } },
+				{
+					_id: {
+						$ne: loggedInUser._id,
+					},
+				},
+			],
+		}).select("firstname lastName age gender about photUrl skills");
+
+		res.send(users);
+	} catch (error) {
+		res.status(400).json({
 			message: error.message,
 		});
 	}
