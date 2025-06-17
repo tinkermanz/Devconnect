@@ -116,7 +116,10 @@ userRouter.get("/feed", userAuth, async (req, res, next) => {
 			],
 		}).select("firstname lastName age gender about photUrl skills");
 
-		res.send(users);
+		res.json({
+			data: users,
+			message: "Data fetched successfully",
+		});
 	} catch (error) {
 		res.status(400).json({
 			message: error.message,
