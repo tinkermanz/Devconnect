@@ -2,10 +2,12 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import Body from "./components/Body";
 import Login from "./components/Login";
 import Profile from "./components/Profile";
+import { Provider } from "react-redux";
+import { store } from "./utils/appStore";
 
 function App() {
 	return (
-		<>
+		<Provider store={store}>
 			<BrowserRouter basename="/">
 				<Routes>
 					<Route path="/" element={<Body />}>
@@ -14,7 +16,7 @@ function App() {
 					</Route>
 				</Routes>
 			</BrowserRouter>
-		</>
+		</Provider>
 	);
 }
 
