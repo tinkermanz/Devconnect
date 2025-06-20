@@ -22,7 +22,7 @@ const Body = () => {
 			dispatch(addUser(res.data));
 		} catch (err) {
 			if (err.status === 401) navigate("/login");
-			throw new Error("User data can't be fetched: \n" + err.message);
+			console.error("User data can't be fetched: \n" + err.message);
 		}
 	};
 

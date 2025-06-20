@@ -50,11 +50,11 @@ userRouter.get("/user/connections", userAuth, async (req, res, next) => {
 		})
 			.populate(
 				"fromUserId",
-				"firstname lastName age gender about photUrl skills"
+				"firstname lastName age gender about photoUrl skills"
 			)
 			.populate(
 				"fromUserId",
-				"firstname lastName age gender about photUrl skills"
+				"firstname lastName age gender about photoUrl skills"
 			);
 
 		const data = connectionRequests.map((row) => {
@@ -114,7 +114,7 @@ userRouter.get("/feed", userAuth, async (req, res, next) => {
 					},
 				},
 			],
-		}).select("firstname lastName age gender about photUrl skills");
+		}).select("firstname lastName age gender about photoUrl skills");
 
 		res.json({
 			data: users,

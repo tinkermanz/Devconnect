@@ -11,14 +11,14 @@ authRouter.post("/signup", async (req, res) => {
 		validateSignUpData(req);
 		// Encrypt the password
 		const { password, firstName, lastName, emailId } = req.body;
-		const passwordhash = await bcrypt.hash(password, 10);
+		const passwordHash = await bcrypt.hash(password, 10);
 
 		// Creatingt a new instance of the User model
 		const user = new User({
 			firstName,
 			lastName,
 			emailId,
-			password: passwordhash,
+			password: passwordHash,
 		});
 
 		await user.save();
@@ -51,12 +51,12 @@ authRouter.post("/login", async (req, res, next) => {
 				expires: new Date(Date.now() + 8 * 3600000),
 			});
 
-			res.status(200).json({
+			return res.status(200).json({
 				data: user,
 			});
 		} else throw new Error("Password is not valid");
 	} catch (error) {
-		res.status(400).send("Error: " + error.message);
+		return res.status(400).send("Error: " + error.message);
 	}
 });
 
