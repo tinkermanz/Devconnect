@@ -23,7 +23,9 @@ userRouter.get("/user/requests/received", userAuth, async (req, res, next) => {
 			"age",
 		]);
 
-		res.status(200).res.json({
+		console.log(connectionRequests);
+
+		return res.status(200).json({
 			message: "Data fetched Successfully",
 			data: connectionRequests,
 		});
