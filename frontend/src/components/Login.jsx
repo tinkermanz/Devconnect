@@ -6,8 +6,12 @@ import { useNavigate } from "react-router";
 import { BASE_URL } from "../utils/constant";
 
 const Login = () => {
+	const [isLoginForm, setIsLoginForm] = useState(true);
+
 	const [emailId, setEmailId] = useState("test.user1@example.com");
 	const [password, setPassword] = useState("Test1234!");
+	const [firstName, setFirstName] = useState("");
+	const [lastName, setLastName] = useState("");
 
 	const [error, setError] = useState("");
 
@@ -35,17 +39,77 @@ const Login = () => {
 		}
 	};
 
+	const handleSignup = async () => {
+		try {
+			const res = await axios.post(
+				`${BASE_URL}/signup`,
+				{
+					firstName,
+					lastName,
+					emailId,
+					password,
+				},
+				{
+					withCredentials: true,
+				}
+			);
+
+			dispatch(addUser(res.data.data));
+			navigate("/profile");
+		} catch (err) {
+			setError(err?.response?.data || "Something went wrong");
+		}
+	};
+
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-base-300 px-4">
 			<div className="card w-full max-w-sm bg-base-100 text-base-content shadow-lg rounded-2xl p-10 space-y-8">
 				<h2 className="text-2xl font-semibold text-center tracking-tight">
-					Log In
+					{isLoginForm ? "Login" : "Signup"}
 				</h2>
 				<form
 					className="space-y-6"
 					aria-label="Login form"
-					onSubmit={handleLogin}
+					onSubmit={isLoginForm ? handleLogin : handleSignup}
 				>
+					{!isLoginForm && (
+						<>
+							<div className="form-control">
+								<label htmlFor="firstName" className="label">
+									<span className="label-text text-sm font-medium">
+										FirstName
+									</span>
+								</label>
+								<input
+									id="firstName"
+									type="text"
+									autoComplete="username"
+									value={firstName}
+									onChange={(e) => setFirstName(e.target.value)}
+									placeholder="example"
+									className="input input-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
+									required
+								/>
+							</div>
+							<div className="form-control">
+								<label htmlFor="lastName" className="label">
+									<span className="label-text text-sm font-medium">
+										LastName
+									</span>
+								</label>
+								<input
+									id="lastName"
+									type="text"
+									autoComplete="username"
+									value={lastName}
+									onChange={(e) => setLastName(e.target.value)}
+									placeholder="example"
+									className="input input-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
+									required
+								/>
+							</div>
+						</>
+					)}
 					<div className="form-control">
 						<label htmlFor="emailId" className="label">
 							<span className="label-text text-sm font-medium">Email</span>
@@ -86,15 +150,30 @@ const Login = () => {
 						type="submit"
 						className="btn btn-primary w-full text-sm tracking-wide"
 					>
-						Login
+						{isLoginForm ? "Login" : "Signup"}
 					</button>
 				</form>
-				<p className="text-center text-sm text-base-content/70">
-					Don’t have an account?
-					<a href="#" className="link link-primary font-medium ml-2">
-						Sign up
-					</a>
-				</p>
+				{isLoginForm ? (
+					<p
+						className="text-center text-sm text-base-content/70"
+						onClick={() => setIsLoginForm((val) => !val)}
+					>
+						Don’t have an account?
+						<a href="#" className="link link-primary font-medium ml-2">
+							Signup
+						</a>
+					</p>
+				) : (
+					<p
+						className="text-center text-sm text-base-content/70"
+						onClick={() => setIsLoginForm((val) => !val)}
+					>
+						Existing user?
+						<a href="#" className="link link-primary font-medium ml-2">
+							Login here
+						</a>
+					</p>
+				)}
 			</div>
 		</div>
 	);
